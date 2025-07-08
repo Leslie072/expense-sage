@@ -28,30 +28,20 @@ RUN mkdir -p /app/data && chmod 755 /app/data
 # Copy built Flutter web files
 COPY --from=build /app/build/web /usr/share/nginx/html
 
-# Create Railway-compatible nginx configuration
-RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
-    echo '    listen $PORT;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    server_name _;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    index index.html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '' >> /etc/nginx/conf.d/default.conf && \
-    echo '    # Flutter web routing' >> /etc/nginx/conf.d/default.conf && \
-    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    }' >> /etc/nginx/conf.d/default.conf && \
-    echo '' >> /etc/nginx/conf.d/default.conf && \
-    echo '    # Health check' >> /etc/nginx/conf.d/default.conf && \
-    echo '    location /health {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        return 200 "healthy";' >> /etc/nginx/conf.d/default.conf && \
-    echo '        add_header Content-Type text/plain;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    }' >> /etc/nginx/conf.d/default.conf && \
-    echo '' >> /etc/nginx/conf.d/default.conf && \
-    echo '    # Cache static assets' >> /etc/nginx/conf.d/default.conf && \
-    echo '    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        expires 1y;' >> /etc/nginx/conf.d/default.conf && \
-    echo '        add_header Cache-Control "public, immutable";' >> /etc/nginx/conf.d/default.conf && \
-    echo '    }' >> /etc/nginx/conf.d/default.conf && \
-    echo '}' >> /etc/nginx/conf.d/default.conf
+# Create simple nginx configuration template
+RUN echo 'server {' > /etc/nginx/conf.d/default.conf.template && \
+    echo '    listen ${PORT};' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '    server_name _;' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '    index index.html;' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '    location / {' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '        try_files $$uri $$uri/ /index.html;' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '    location /health {' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '        return 200 "healthy";' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '        add_header Content-Type text/plain;' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf.template && \
+    echo '}' >> /etc/nginx/conf.d/default.conf.template
 
 # Create database initialization script
 RUN echo '#!/bin/sh' > /app/init-db.sh && \
@@ -69,20 +59,24 @@ RUN echo '#!/bin/sh' > /app/init-db.sh && \
 
 # Create startup script for Railway
 RUN echo '#!/bin/sh' > /start.sh && \
+    echo 'set -e' >> /start.sh && \
     echo 'echo "Starting Expense Sage on Railway..."' >> /start.sh && \
-    echo 'export PORT=${PORT:-80}' >> /start.sh && \
+    echo 'export PORT=${PORT:-8080}' >> /start.sh && \
     echo 'echo "Using PORT: $PORT"' >> /start.sh && \
     echo '' >> /start.sh && \
     echo '# Initialize database' >> /start.sh && \
     echo '/app/init-db.sh' >> /start.sh && \
     echo '' >> /start.sh && \
-    echo '# Replace PORT in nginx config' >> /start.sh && \
-    echo 'envsubst "\$PORT" < /etc/nginx/conf.d/default.conf > /tmp/default.conf' >> /start.sh && \
-    echo 'mv /tmp/default.conf /etc/nginx/conf.d/default.conf' >> /start.sh && \
+    echo '# Generate nginx config from template' >> /start.sh && \
+    echo 'envsubst < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf' >> /start.sh && \
+    echo 'rm /etc/nginx/conf.d/default.conf.template' >> /start.sh && \
+    echo '' >> /start.sh && \
+    echo '# Test nginx config' >> /start.sh && \
+    echo 'nginx -t' >> /start.sh && \
     echo '' >> /start.sh && \
     echo '# Start nginx' >> /start.sh && \
     echo 'echo "Starting nginx on port $PORT..."' >> /start.sh && \
-    echo 'nginx -g "daemon off;"' >> /start.sh && \
+    echo 'exec nginx -g "daemon off;"' >> /start.sh && \
     chmod +x /start.sh
 
 # Expose port (Railway will set PORT env var)
