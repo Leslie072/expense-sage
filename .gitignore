@@ -43,3 +43,24 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Heroku production - ignore unnecessary files
+docker/
+scripts/
+.github/
+DEPLOYMENT.md
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Environment files (keep .env.production for Heroku)
+.env.local
+.env.development
+.env.test
+
+# Backup files
+*.backup
+*.bak
