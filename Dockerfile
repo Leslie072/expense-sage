@@ -13,8 +13,8 @@ RUN flutter pub get
 # Copy all source code
 COPY . .
 
-# Build Flutter web app for production
-RUN flutter build web --release
+# Build Flutter web app for production (skip icon tree shaking to avoid IconData errors)
+RUN flutter build web --release --no-tree-shake-icons
 
 # Production stage with Nginx
 FROM nginx:alpine
