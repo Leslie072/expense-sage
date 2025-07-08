@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # Main Flutter Web Application
+  expense-sage-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: expense-sage-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./data:/app/data
+      - ./docker/ssl:/etc/nginx/ssl:ro
+    environment:
+      - NODE_ENV=production
+      - FLUTTER_WEB_USE_SKIA=false
+    networks:
+      - expense-sage-network
+    depends_on:
+      - expense-sage-db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Database Service (SQLite with backup)
+  expense-sage-db:
+    image: alpine:latest
+    container_name: expense-sage-db
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+      - ./docker/backup:/backup
+    environment:
+      - DB_PATH=/data/expense_sage.db
+    command: >
+      sh -c "
+        apk add --no-cache sqlite &&
+        mkdir -p /data /backup &&
+        if [ ! -f /data/expense_sage.db ]; then
+          echo 'Initializing database...'
+          sqlite3 /data/expense_sage.db < /backup/init.sql || true
+        fi &&
+        echo 'Database service ready' &&
+        tail -f /dev/null
+      "
+    networks:
+      - expense-sage-network
+
+  # Backup Service
+  expense-sage-backup:
+    image: alpine:latest
+    container_name: expense-sage-backup
+    restart: unless-stopped
+    volumes:
+      - ./data:/data:ro
+      - ./docker/backup:/backup
+    environment:
+      - BACKUP_INTERVAL=3600  # 1 hour
+    command: >
+      sh -c "
+        apk add --no-cache sqlite &&
+        while true; do
+          echo 'Creating backup...'
+          timestamp=$$(date +%Y%m%d_%H%M%S)
+          sqlite3 /data/expense_sage.db '.backup /backup/expense_sage_backup_$$timestamp.db'
+          find /backup -name 'expense_sage_backup_*.db' -mtime +7 -delete
+          echo 'Backup completed'
+          sleep $$BACKUP_INTERVAL
+        done
+      "
+    networks:
+      - expense-sage-network
+    depends_on:
+      - expense-sage-db
+
+  # Monitoring Service (Optional)
+  expense-sage-monitor:
+    image: prom/prometheus:latest
+    container_name: expense-sage-monitor
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - expense-sage-network
+    profiles:
+      - monitoring
+
+networks:
+  expense-sage-network:
+    driver: bridge
+
+volumes:
+  expense-sage-data:
+    driver: local

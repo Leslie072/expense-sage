@@ -1,0 +1,24 @@
+{
+  "currencies": [
+    {"code": "USD", "name": "United States Dollar", "symbol": "$", "flag": "🇺🇸"},
+    {"code": "EUR", "name": "Euro", "symbol": "€", "flag": "🇪🇺"},
+    {"code": "JPY", "name": "Japanese Yen", "symbol": "¥", "flag": "🇯🇵"},
+    {"code": "XAF", "name": "Central African CFA Franc", "symbol": "FCFA", "flag": "🇨🇲"},
+    {"code": "XOF", "name": "West African CFA Franc", "symbol": "CFA", "flag": "🇸🇳"},
+    {"code": "NGN", "name": "Nigerian Naira", "symbol": "₦", "flag": "🇳🇬"},
+    {"code": "GHS", "name": "Ghanaian Cedi", "symbol": "₵", "flag": "🇬🇭"},
+    {"code": "KES", "name": "Kenyan Shilling", "symbol": "KSh", "flag": "🇰🇪"},
+    {"code": "UGX", "name": "Ugandan Shilling", "symbol": "USh", "flag": "🇺🇬"},
+    {"code": "TZS", "name": "Tanzanian Shilling", "symbol": "TSh", "flag": "🇹🇿"},
+    {"code": "ZAR", "name": "South African Rand", "symbol": "R", "flag": "🇿🇦"},
+    {"code": "EGP", "name": "Egyptian Pound", "symbol": "£", "flag": "🇪🇬"},
+    {"code": "MAD", "name": "Moroccan Dirham", "symbol": "DH", "flag": "🇲🇦"},
+    {"code": "ETB", "name": "Ethiopian Birr", "symbol": "Br", "flag": "🇪🇹"},
+    {"code": "GBP", "name": "British Pound Sterling", "symbol": "£", "flag": "🇬🇧"},
+    {"code": "CAD", "name": "Canadian Dollar", "symbol": "C$", "flag": "🇨🇦"},
+    {"code": "AUD", "name": "Australian Dollar", "symbol": "A$", "flag": "🇦🇺"},
+    {"code": "CHF", "name": "Swiss Franc", "symbol": "CHF", "flag": "🇨🇭"},
+    {"code": "CNY", "name": "Chinese Yuan", "symbol": "¥", "flag": "🇨🇳"},
+    {"code": "INR", "name": "Indian Rupee", "symbol": "₹", "flag": "🇮🇳"}
+  ]
+}
