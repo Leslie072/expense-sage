@@ -44,11 +44,8 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Heroku production - ignore unnecessary files
-docker/
-scripts/
-.github/
-DEPLOYMENT.md
+# Railway production - ignore unnecessary files
+.railway/
 
 # Local database files
 *.db
