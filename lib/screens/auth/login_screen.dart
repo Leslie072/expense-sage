@@ -5,8 +5,9 @@ import 'package:expense_sage/screens/auth/signup_screen.dart';
 import 'package:expense_sage/screens/auth/forgot_password_screen.dart';
 import 'package:expense_sage/screens/auth/admin_business_registration_screen.dart';
 import 'package:expense_sage/model/user.model.dart';
-import 'package:expense_sage/dao/user_dao.dart';
+
 import 'package:expense_sage/helpers/color.helper.dart';
+import 'package:expense_sage/widgets/biometric_login_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -55,35 +56,6 @@ class _LoginScreenState extends State<LoginScreen> {
             _emailController.text.trim(),
             _passwordController.text,
           );
-    }
-  }
-
-  Future<void> _createAdminUser() async {
-    try {
-      final userDao = UserDao();
-      await userDao.createAdminUser();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Admin user created successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // Auto-fill the credentials
-        _emailController.text = 'admin@expensesage.com';
-        _passwordController.text = 'admin123';
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error creating admin user: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 
@@ -281,71 +253,83 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Quick Admin Access (for demo purposes)
+                  // Quick Demo Access
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.orange.shade200),
+                      gradient: LinearGradient(
+                        colors: [Colors.blue.shade50, Colors.purple.shade50],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.shade200),
                     ),
                     child: Column(
                       children: [
-                        Text(
-                          'Quick Admin Access',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange.shade800,
-                          ),
+                        Icon(
+                          Icons.rocket_launch,
+                          color: Colors.blue.shade600,
+                          size: 32,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Email: admin@expensesage.com\nPassword: admin123',
+                          'Try Demo Account',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Experience all features with sample data',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.orange.shade700,
+                            color: Colors.blue.shade600,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  _emailController.text =
-                                      'admin@expensesage.com';
-                                  _passwordController.text = 'admin123';
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                ),
-                                child: const Text('Fill Admin'),
-                              ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            _emailController.text = 'demo@expensesage.com';
+                            _passwordController.text = 'demo123';
+                          },
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Try Demo'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade600,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: _createAdminUser,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                ),
-                                child: const Text('Create Admin'),
-                              ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Biometric Login
+                  BiometricLoginWidget(
+                    onSuccess: () {
+                      // Auto-login with demo account for biometric success
+                      _emailController.text = 'demo@expensesage.com';
+                      _passwordController.text = 'demo123';
+                      _handleLogin();
+                    },
+                    onError: (error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(error),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

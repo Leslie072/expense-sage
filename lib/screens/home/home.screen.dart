@@ -10,6 +10,8 @@ import 'package:expense_sage/screens/home/widgets/account_slider.dart';
 import 'package:expense_sage/screens/payment_form.screen.dart';
 import 'package:expense_sage/widgets/cards/dashboard_card.dart';
 import 'package:expense_sage/widgets/cards/transaction_card.dart';
+import 'package:expense_sage/widgets/quick_actions_widget.dart';
+import 'package:expense_sage/widgets/theme_toggle_widget.dart';
 import 'package:expense_sage/theme/app_theme.dart';
 import 'package:expense_sage/helpers/currency.helper.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +56,49 @@ class _HomeScreenState extends State<HomeScreen> {
   void openAddPaymentPage(PaymentType type) async {
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (builder) => PaymentForm(type: type)));
+  }
+
+  void _handleQuickAction(String action, double? amount) {
+    switch (action) {
+      case 'add_income':
+        // Create quick income transaction
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (builder) => PaymentForm(
+              type: PaymentType.debit,
+            ),
+          ),
+        );
+        break;
+      case 'add_expense':
+        // Create quick expense transaction
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (builder) => PaymentForm(
+              type: PaymentType.credit,
+            ),
+          ),
+        );
+        break;
+      case 'save_money':
+        // Navigate to savings goals
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Savings feature coming soon!'),
+            backgroundColor: Colors.blue,
+          ),
+        );
+        break;
+      case 'view_reports':
+        // Navigate to reports
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Check the Reports tab for detailed analytics!'),
+            backgroundColor: Colors.purple,
+          ),
+        );
+        break;
+    }
   }
 
   void handleChooseDateRange() async {
@@ -238,6 +283,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   AccountsSlider(accounts: _accounts),
                   const SizedBox(height: AppTheme.spacing16),
                 ],
+              ),
+            ),
+
+            // Quick Actions Section
+            SliverToBoxAdapter(
+              child: QuickActionsWidget(
+                onActionTap: (action, amount) {
+                  _handleQuickAction(action, amount);
+                },
               ),
             ),
             // Transactions Header

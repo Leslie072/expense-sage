@@ -1,11 +1,9 @@
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "Dockerfile.simple"
 
 [deploy]
 startCommand = "/start.sh"
-healthcheckPath = "/health"
-healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 
 [env]
